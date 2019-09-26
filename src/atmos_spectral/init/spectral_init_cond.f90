@@ -12,8 +12,8 @@ use         constants_mod, only: grav, pi
 use   vert_coordinate_mod, only: compute_vert_coord
 
 use        transforms_mod, only: get_grid_boundaries, get_deg_lon, get_deg_lat, trans_grid_to_spherical, &
-                                 trans_spherical_to_grid, grid_domain, spectral_domain, get_grid_domain, &
-                                 get_spec_domain
+                                 trans_spherical_to_grid, get_grid_domain, get_spec_domain 
+use           spec_mpp_mod,only: grid_domain, spectral_domain
 
 use  press_and_geopot_mod, only: press_and_geopot_init, pressure_variables
 
@@ -36,16 +36,17 @@ public :: spectral_init_cond
 
 real :: initial_temperature=264.
 
+
 namelist / spectral_init_cond_nml / initial_temperature
 
-contains
+Contains
 
 !=========================================================================================================================
 
 subroutine spectral_init_cond(reference_sea_level_press, triang_trunc, use_virtual_temperature, topography_option, &
                               vert_coord_option, vert_difference_option, scale_heights, surf_res,    &
                               p_press, p_sigma, exponent, ocean_topog_smoothing, pk, bk, vors, divs, &
-                              ts, ln_ps, ug, vg, tg, psg, vorg, divg, surf_geopotential, ocean_mask)
+                              ts, ln_ps, ug, vg, tg, psg, vorg, divg, surf_geopotential, ocean_mask, specify_initial_conditions)
 
 real,    intent(in) :: reference_sea_level_press
 logical, intent(in) :: triang_trunc, use_virtual_temperature
@@ -59,11 +60,18 @@ real,    intent(out), dimension(:,:  ) :: psg
 real,    intent(out), dimension(:,:,:) :: vorg, divg
 real,    intent(out), dimension(:,:  ) :: surf_geopotential
 logical, optional, intent(in), dimension(:,:) :: ocean_mask
+logical, intent(in) :: specify_initial_conditions   !epg+ray  
 
+! epg+ray: choice_of_init is used by spectral_initialize_fields to actually set up initial conditions 
 integer :: choice_of_init = 2
 integer :: unit, ierr, io
 
 !------------------------------------------------------------------------------------------------
+
+! epg+ray: if we want to specify the initial conditions, set choice_of_init to 3
+if(specify_initial_conditions) then
+  choice_of_init=3
+endif
 
 unit = open_namelist_file()
 ierr=1

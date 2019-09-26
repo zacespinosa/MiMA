@@ -39,6 +39,10 @@ if ($add_flag) then
     set NETCDF_INC = `nc-config --fflags`
     set NETCDF_LIB = `nc-config --flibs`
 endif
+if ($add_flag) then
+    set NETCDF_INC = `nc-config --fflags`
+    set NETCDF_LIB = `nc-config --flibs`
+endif
 #--------------------------------------------------------------------------------------------------------
 # setup directory structure
 if ( ! -d $execdir ) mkdir $execdir
