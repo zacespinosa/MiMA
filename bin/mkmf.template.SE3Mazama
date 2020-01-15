@@ -21,6 +21,12 @@ LIB_NETCDF=${NETCDF_LIB}
 #MVAPICH2_INC=${MPI_DIR}/include
 CPATH=${INCLUDE}:${MPI_DIR}/include:CPATH
 #
+echo "**** ****"
+echo "set MYVAR:"
+set MYVAR=`nc-config --libs`
+echo $MYVAR
+echo "**** ****"
+#
 #
 # yoder:
 #
@@ -34,7 +40,9 @@ CPATH=${INCLUDE}:${MPI_DIR}/include:CPATH
 # typical use with mkmf
 # mkmf -t template.ifc -c"-Duse_libMPI -Duse_netCDF" path_names /usr/local/include
 # yoder:
-FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g -I${NETCDF_INC} -I${NETCDF_FORTRAN_INC} -I${MPI_DIR}/include -I${HDF5_INC}
+FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g `nc-config --fflags` `nf-config --fflags` `pkg-config --fflags ompi-fort` -I${HDF5_INC} -I${HDF5_LIB}
+#
+#FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g -I${NETCDF_INC} -I${NETCDF_FORTRAN_INC} -I${MPI_DIR}/include -I${HDF5_INC}
 #FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -i-dynamic -assume byterecl -i4 -r8 -g -I${NETCDF_INC} -I${MVAPICH2_INC}
 #
 #FFLAGS = ${DEBUG} -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -O3 -axAVX -xSSE2 -ipo -i4 -r8 -g ${INC_NETCDF} -I${MVAPICH2_INC}
@@ -47,7 +55,12 @@ OPT = -O2
 FFLAGS += ${OPT}
 #
 # yoder:
-CPPFLAGS =  -I/usr/include -I/usr/local/include -I${NETCDF_INC} -I${MPI_DIR}/include #-I/usr/mpi/intel/mvapich-1.1.0/include
+# TODO: move these nc/pkg-config sub-scripts up and export into variables, so the following line(s) are not
+#  changed; all the changing happens up top (so like MPI_CFLAGS=`pkg-config --cflags ompi` )
+CPPFLAGS=-I/usr/include -I/usr/local/include `nc-config --cflags` `nf-config --cflags `pkg-config --cflags ompi` `pkg-config --cflags ompi-fort` -I${HDF5_INC}
+
+
+#CPPFLAGS =  -I/usr/include -I/usr/local/include -I${NETCDF_INC} -I${MPI_DIR}/include #-I/usr/mpi/intel/mvapich-1.1.0/include
 #CPPFLAGS =  -I/usr/include -I/usr/local/include -I${NETCDF_INC}  -I${MVAPICH2_INC} #-I/usr/mpi/intel/mvapich-1.1.0/include
 
 FC = mpif90
@@ -55,7 +68,8 @@ LD = mpif90
 
 #LDFLAGS = -shared-intel -L/usr/local/lib -L${LIB_NETCDF}
 # yoder:
-LDFLAGS = -shared-intel -L/usr/local/lib -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB}
+#LDFLAGS = -shared-intel -L/usr/local/lib -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB}
+LDFLAGS=-shared-intel -L/usr/local/lib `nc-config --libs` `nf-config --libs` `pkg-config --libs ompi` `pkg-config --libs ompi-fort` -L${HDF5_LIB}
 
 
 CFLAGS = -D__IFC

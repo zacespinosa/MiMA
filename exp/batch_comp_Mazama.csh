@@ -4,7 +4,8 @@
 #SBATCH -o compileme.out
 #SBATCH -e compileme.err
 #
-cd /scratch/myoder96/Downloads/MiMA-1.0.1/exp
+#cd /scratch/myoder96/Downloads/MiMA-1.0.1/exp
+cd /scratch/myoder96/MiMA
 #
 #cd exec.SE3Mazama
 #make clean
