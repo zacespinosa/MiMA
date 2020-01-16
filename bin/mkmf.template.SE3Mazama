@@ -62,8 +62,12 @@ LD = mpif90
 
 #LDFLAGS = -shared-intel -L/usr/local/lib -L${LIB_NETCDF}
 # yoder:
-#LDFLAGS = -shared-intel -L/usr/local/lib -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB}
-LDFLAGS=${MIMA_CONFIG_LDFLAGS}
+LDFLAGS = -shared-intel -L/usr/local/lib -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB} -lnetcdf -lnetcdff
+#
+# something in this breaks (getting an error like, "variable name must start with a letter"). we need a simpler string. the above appears to work.
+#   generally, efforts for a comprehensive, semi-automated approach to construct the -L, -I tags from *-config calls probably 1) is overkill anyway, and
+#   2) breaks mkmf.
+#LDFLAGS = ${MIMA_CONFIG_LDFLAGS}
 
-
+#
 CFLAGS = -D__IFC

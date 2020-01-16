@@ -30,5 +30,8 @@ git_message
 it_jobscript*
 simple_jobscript*
 bin/mppnccombine.nyu
-
+#
+# also ignore the exec temporary directories:
+# exp/exec.*
+#
 .DS_Store

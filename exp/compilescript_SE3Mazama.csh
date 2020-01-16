@@ -29,9 +29,16 @@ module load pnetcdf/1.12.0
 #set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nc-config --libs; nc-config --flibs; nf-config --flibs; ncxx4-config --libs; pnetcdf-config --ldflags; pnetcdf-config --libs; pkg-config --libs mvapich2` -L${HDF5_LIB} -L`pnetcdf-config --libdir`"
 
 # openmpi3:
-set MIMA_CONFIG_FFLAGS = "`nc-config --fflags; nf-config --fflags; pnetcdf-config --fcflags; pkg-config --cflags ompi-fort` -I${HDF5_INC} -I${HDF5_LIB}"
-set MIMA_CONFIG_CFLAGS = "`nc-config --cflags; nf-config --cflags; pnetcdf-config --cflags; pkg-config --cflags ompi; pkg-config --cflags ompi-fort` -I${HDF5_INC}"
-set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nc-config --libs; nc-config --flibs; nf-config --flibs; ncxx4-config --libs; pnetcdf-config --ldflags; pnetcdf-config --libs; pkg-config --libs ompi; pkg-config --libs ompi-fort` -L${HDF5_LIB}"
+# pnetcdf-config --fflags; pnetcdf-config --fcflags;
+set MIMA_CONFIG_FFLAGS = "`nc-config --fflags; nf-config --fflags` -I${HDF5_INC} -I${HDF5_LIB} -I${MPI_DIR}/include  -I${MPI_DIR}/lib -I${NETCDF_FORTRAN_LIB}"
+#$ pnetcdf-config --cflags; pkg-config --cflags ompi-fort;
+set MIMA_CONFIG_CFLAGS = "`nc-config --cflags; nf-config --cflags; pkg-config --cflags ompi; pkg-config --cflags ompi-fort` -I${HDF5_INC}"
+# x; ncxx4-config --libs; pnetcdf-config --ldflags; pnetcdf-config --libs
+set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nc-config --libs; nc-config --flibs; nf-config --flibs; pkg-config --libs ompi; pkg-config --libs ompi-fort` -L${HDF5_LIB}"
+
+# TODO: in the template, LDPATH should be getting set to MIMA_CONFIG_LDFLAGS, but it appears that it is not. It is, in fact, the very final compile step
+#  that appears to be failing because the linking paths are not provided... and after all of this, it looks like it may just need the -L and -l prams for
+#  NetCDF and NetCDF-fortran. so we can hack it manually if necessary, but it would be nice to make the script(s) work../.
 #
 #
 set echo
@@ -71,7 +78,7 @@ echo "*** compile step..."
 # compile mppnccombine.c, will be used only if $npes > 1
 if ( ! -f $mppnccombine ) then
   #icc -O -o $mppnccombine -I$NETCDF_INC -L$NETCDF_LIB $cwd/../postprocessing/mppnccombine.c -lnetcdf
-    icc -O -o $mppnccombine -I$NETCDF_INC -I$NETCDF_FORTRAN_INC -I$PNETCDF_INC -L$NETCDF_LIB -L$NETCDF_FORTRAN_LIB -L$PNETCDF_LIB -lnetcdf -lnetcdff $cwd/../postprocessing/mppnccombine.c
+    icc -O -o $mppnccombine -I$NETCDF_INC -I$NETCDF_FORTRAN_INC  -L$NETCDF_LIB -L$NETCDF_FORTRAN_LIB -lnetcdf -lnetcdff $cwd/../postprocessing/mppnccombine.c
 endif
 #--------------------------------------------------------------------------------------------------------
 
@@ -90,8 +97,15 @@ echo "*** compile the model code and create executable"
 cd $execdir
 #set cppDefs = "-Duse_libMPI -Duse_netCDF"
 set cppDefs = "-Duse_libMPI -Duse_netCDF -DgFortran"
+#
 
 #$mkmf -p mima.x -t $template -c "$cppDefs" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
-$mkmf -p mima.x -t $template -c "$cppDefs" -a $sourcedir $pathnames /usr/local/include ${NETCDF_INC} ${NETCDF_FORTRAN_INC} ${PNETCDF_INC} ${HDF5_INC} ${MPI_DIR}/include $sourcedir/shared/mpp/include $sourcedir/shared/include
+$mkmf -p mima.x -t $template -c "$cppDefs" -a $sourcedir $pathnames /usr/local/include ${NETCDF_INC} ${NETCDF_FORTRAN_INC} ${HDF5_INC} ${MPI_DIR}/include $sourcedir/shared/mpp/include $sourcedir/shared/include
 #
+# yoder:
+# this might work here -- setting LDFLAGS after all other things have passed, but it's breaking -- probably on some sort of c-shell + mkmf combined
+#  syntax elsewhere. I think that the pkg-config, nc-config, nf-config, etc. calls produce some content that mkmf+cshell cannot handle, resulting in an
+#  error like, "variable name must start with a letter" (so I think it's trying to define a variable in the middle of the variable definition string).
+#set LDFLAGS = "${MIMA_CONFIG_LDFLAGS}"
+
 make -f Makefile -j $npes
