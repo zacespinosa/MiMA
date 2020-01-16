@@ -12,26 +12,47 @@ module unuse /usr/local/modulefiles
 #module load intel
 #module load mvapich2
 module load intel/19.1.0.166
+#
 #module load mvapich2/2.3.2
 module load openmpi3
-
 #
-# from prefix: /opt/ohpc/pub/moduledeps/intel-openmpi3
 module load netcdf/4.7.1
 module load netcdf-fortran/4.5.2
 module load netcdf-cxx/4.3.1
 module load pnetcdf/1.12.0
 #
+# note also netcdf-cxx configurations:
+# ncxx4-config --cflags;
+# mvapich2:
+#set MIMA_CONFIG_FFLAGS = "`nc-config --fflags; nf-config --fflags; pnetcdf-config --fcflags; pkg-config --cflags mvapich2` -I${HDF5_INC} -I${HDF5_LIB}"
+#set MIMA_CONFIG_CFLAGS = "`nc-config --cflags; nf-config --cflags; pnetcdf-config --cflags; pkg-config --cflags mvapich2` -I${HDF5_INC}"
+#set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nc-config --libs; nc-config --flibs; nf-config --flibs; ncxx4-config --libs; pnetcdf-config --ldflags; pnetcdf-config --libs; pkg-config --libs mvapich2` -L${HDF5_LIB} -L`pnetcdf-config --libdir`"
+
+# openmpi3:
+set MIMA_CONFIG_FFLAGS = "`nc-config --fflags; nf-config --fflags; pnetcdf-config --fcflags; pkg-config --cflags ompi-fort` -I${HDF5_INC} -I${HDF5_LIB}"
+set MIMA_CONFIG_CFLAGS = "`nc-config --cflags; nf-config --cflags; pnetcdf-config --cflags; pkg-config --cflags ompi; pkg-config --cflags ompi-fort` -I${HDF5_INC}"
+set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nc-config --libs; nc-config --flibs; nf-config --flibs; ncxx4-config --libs; pnetcdf-config --ldflags; pnetcdf-config --libs; pkg-config --libs ompi; pkg-config --libs ompi-fort` -L${HDF5_LIB}"
+#
+#
+set echo
 #
 echo "** cwd: " $cwd
-
+echo "MIMA_CONFIG_FFLAGS: ${MIMA_CONFIG_FFLAGS}"
+echo "MIMA_CONFIG_CFLAGS: ${MIMA_CONFIG_CFLAGS}"
+echo "MIMA_CONFIG_LDFLAGS: ${MIMA_CONFIG_LDFLAGS}"
 #
-set echo 
+if (! $?MIMA_nPROCS) then
+	set MIMA_nPROCS = 1
+endif
+echo "Compile on N=${MIMA_nPROCS} process"
+#
+#
+ 
 #--------------------------------------------------------------------------------------------------------
 # define variables
 #set platform  = nyu                                     # A unique identifier for your platform
 set platform  = SE3Mazama
-set npes      = 1                                       # number of processors
+set npes      = $MIMA_nPROCS                                       # number of processors
 set template  = $cwd/../bin/mkmf.template.$platform   # path to template for your platform
 set mkmf      = $cwd/../bin/mkmf                      # path to executable mkmf
 set sourcedir = $cwd/../src                           # path to directory containing model source code
@@ -50,7 +71,7 @@ echo "*** compile step..."
 # compile mppnccombine.c, will be used only if $npes > 1
 if ( ! -f $mppnccombine ) then
   #icc -O -o $mppnccombine -I$NETCDF_INC -L$NETCDF_LIB $cwd/../postprocessing/mppnccombine.c -lnetcdf
-    icc -O -o $mppnccombine -I$NETCDF_INC -L$NETCDF_LIB $cwd/../postprocessing/mppnccombine.c -lnetcdf -lnetcdff
+    icc -O -o $mppnccombine -I$NETCDF_INC -I$NETCDF_FORTRAN_INC -I$PNETCDF_INC -L$NETCDF_LIB -L$NETCDF_FORTRAN_LIB -L$PNETCDF_LIB -lnetcdf -lnetcdff $cwd/../postprocessing/mppnccombine.c
 endif
 #--------------------------------------------------------------------------------------------------------
 
@@ -71,8 +92,6 @@ cd $execdir
 set cppDefs = "-Duse_libMPI -Duse_netCDF -DgFortran"
 
 #$mkmf -p mima.x -t $template -c "$cppDefs" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
-$mkmf -p mima.x -t $template -c "$cppDefs" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $NETCDF_FORTRAN_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
-#
-echo "*** *** DEBUG: * ## *, NETCDF_INC: * ${NETCDF_INC} *, NETCDF_FORTRAN_INC: * ${NETCDF_FORTRAN_INC} *" 
+$mkmf -p mima.x -t $template -c "$cppDefs" -a $sourcedir $pathnames /usr/local/include ${NETCDF_INC} ${NETCDF_FORTRAN_INC} ${PNETCDF_INC} ${HDF5_INC} ${MPI_DIR}/include $sourcedir/shared/mpp/include $sourcedir/shared/include
 #
 make -f Makefile -j $npes
