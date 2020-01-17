@@ -66,7 +66,7 @@ LDFLAGS = -shared-intel -L/usr/local/lib -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB}
 #
 # something in this breaks (getting an error like, "variable name must start with a letter"). we need a simpler string. the above appears to work.
 #   generally, efforts for a comprehensive, semi-automated approach to construct the -L, -I tags from *-config calls probably 1) is overkill anyway, and
-#   2) breaks mkmf.
+#   2) breaks mkmf. One approach that might work is to do the same basic construction of MIMA_CONFIG_LDFLAGS, but use the L-only and l-only options.
 #LDFLAGS = ${MIMA_CONFIG_LDFLAGS}
 
 #

@@ -18,8 +18,10 @@ module load openmpi3
 #
 module load netcdf/4.7.1
 module load netcdf-fortran/4.5.2
-module load netcdf-cxx/4.3.1
-module load pnetcdf/1.12.0
+#module load netcdf-cxx/4.3.1
+#module load pnetcdf/1.12.0
+#
+
 #
 # note also netcdf-cxx configurations:
 # ncxx4-config --cflags;
@@ -31,7 +33,7 @@ module load pnetcdf/1.12.0
 # openmpi3:
 # pnetcdf-config --fflags; pnetcdf-config --fcflags;
 set MIMA_CONFIG_FFLAGS = "`nc-config --fflags; nf-config --fflags` -I${HDF5_INC} -I${HDF5_LIB} -I${MPI_DIR}/include  -I${MPI_DIR}/lib -I${NETCDF_FORTRAN_LIB}"
-#$ pnetcdf-config --cflags; pkg-config --cflags ompi-fort;
+#$ pnetcdf-config --cflags ompi; pnetcdf-config --cflags; pkg-config --cflags ompi-fort;
 set MIMA_CONFIG_CFLAGS = "`nc-config --cflags; nf-config --cflags; pkg-config --cflags ompi; pkg-config --cflags ompi-fort` -I${HDF5_INC}"
 # x; ncxx4-config --libs; pnetcdf-config --ldflags; pnetcdf-config --libs
 set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nc-config --libs; nc-config --flibs; nf-config --flibs; pkg-config --libs ompi; pkg-config --libs ompi-fort` -L${HDF5_LIB}"
