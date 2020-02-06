@@ -39,7 +39,9 @@
 #
 #FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g ${MIMA_CONFIG_FFLAGS}
 
-FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g -I${NETCDF_DIR}/include -I${NETCDF_FORTRAN_DIR}/include -I${NETCDF_DIR}/lib -I${NETCDF_FORTRAN_DIR}/lib -I${HDF5_DIR}/include -I${HDF5_DIR}/lib -I${MPI_DIR}/include -I${MPI_DIR}/lib -I${NETCDF_FORTRAN_LIB}
+#FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g -I${NETCDF_DIR}/include -I${NETCDF_FORTRAN_DIR}/include -I${NETCDF_DIR}/lib -I${NETCDF_FORTRAN_DIR}/lib -I${HDF5_DIR}/include -I${HDF5_DIR}/lib -I${MPI_DIR}/include -I${MPI_DIR}/lib -I${NETCDF_FORTRAN_LIB}
+DEBUG = -g -traceback -O2
+FFLAGS = ${DEBUG} -heap-arrays -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -I${NETCDF_DIR}/include -I${NETCDF_FORTRAN_DIR}/include -I${NETCDF_DIR}/lib -I${NETCDF_FORTRAN_DIR}/lib -I${HDF5_DIR}/include -I${HDF5_DIR}/lib -I${MPI_DIR}/include -I${MPI_DIR}/lib -I${NETCDF_FORTRAN_LIB}
 #
 #
 # TODO: figure out how to set these flags...
@@ -56,6 +58,10 @@ FFLAGS += ${OPT}
 #CPPFLAGS=-I/usr/include -I/usr/local/include ${MIMA_CONFIG_CFLAGS}
 CPPFLAGS=-I/usr/include -I/usr/local/include -I${NETCDF_DIR}/include -I${NETCDF_FORTRAN_DIR}/include -I${HDF5_DIR}/include -I${HDF5_DIR}/lib -I${MPI_DIR}/include
 #
+#CC=icc
+#FC=ifort
+#LD=ifort
+#CXX=icpc
 CC=icc
 FC=ifort
 LD=ifort

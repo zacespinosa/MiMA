@@ -46,6 +46,12 @@ export MPIFC=mpiifort
 export MPILD=mpiifort
 export MPICXX=mpiicpc
 #
+export FC=$MPICC
+export LD=$MPIFC
+export CC=$MPICC
+export CXX=$MPICXX
+
+#
 ######################################################################
 ######################################################################
 #
@@ -53,14 +59,14 @@ export MPICXX=mpiicpc
 cwd=`pwd`
 #
 # some convenience variables (can be defined at our discretion):
-HDF5_INC=$HDF5_DIR/include
-HDF5_LIB=$HDF5_DIR/lib
+#HDF5_INC=$HDF5_DIR/include
+#HDF5_LIB=$HDF5_DIR/lib
 #
 # openmpi3:
 # pnetcdf-config --fflags; pnetcdf-config --fcflags;
 # NOTE: something, I think, in the `nc-config`, etc. calls renderes these strings toxic to the end process, so (at least right now)
 #   hand-code these in the template file. eventually though, we want to make these work.
-export MIMA_CONFIG_FFLAGS="`nc-config --fflags; nf-config --fflags` -I${HDF5_INC} -I${HDF5_LIB} -I${MPI_DIR}/include  -I${MPI_DIR}/lib -I${NETCDF_FORTRAN_LIB}"
+export MIMA_CONFIG_FFLAGS="`nc-config --fflags; nf-config --fflags` -I${HDF5_DIR}/include -I${HDF5_DIR}/lib -I${MPI_DIR}/include  -I${MPI_DIR}/lib -I${NETCDF_FORTRAN_DIR}/include -I${NETCDF_FORTRAN_DIR}/lib"
 #$ pnetcdf-config --cflags ompi; pnetcdf-config --cflags; pkg-config --cflags ompi-fort;
 export MIMA_CONFIG_CFLAGS="`nc-config --cflags; nf-config --cflags` -I${MPI_DIR}/include -I${HDF5_DIR}/include"
 # x; ncxx4-config --libs; pnetcdf-config --ldflags; pnetcdf-config --libs
