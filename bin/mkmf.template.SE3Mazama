@@ -1,4 +1,4 @@
-# template for the Intel fortran compiler version 8
+# MiMA template for the Intel fortran compiler version 8
 # Platform: Stanford Earth, Mazama HPC (copied from .nyu template)
 #
 # TODO: use nf-config (fortran) and nc-config (c) to get the netcdf configurations for compilation aka,:
@@ -20,6 +20,7 @@
 LIB_NETCDF=${NETCDF_LIB}
 #MVAPICH2_INC=${MPI_DIR}/include
 CPATH=${INCLUDE}:${MPI_DIR}/include:CPATH
+DEBUG=-g -traceback -debug full -O2
 #
 # yoder:
 #
@@ -33,7 +34,9 @@ CPATH=${INCLUDE}:${MPI_DIR}/include:CPATH
 # typical use with mkmf
 # mkmf -t template.ifc -c"-Duse_libMPI -Duse_netCDF" path_names /usr/local/include
 # yoder:
-FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g ${MIMA_CONFIG_FFLAGS}
+FFLAGS = ${DEBUG} -heap-arrays -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g ${MIMA_CONFIG_FFLAGS}
+# -check all
+#FFLAGS = ${DEBUG}  -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 ${MIMA_CONFIG_FFLAGS}
 #
 #FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -i4 -r8 -g -I${NETCDF_INC} -I${NETCDF_FORTRAN_INC} -I${MPI_DIR}/include -I${HDF5_INC}
 #FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -i-dynamic -assume byterecl -i4 -r8 -g -I${NETCDF_INC} -I${MVAPICH2_INC}
@@ -57,8 +60,20 @@ CPPFLAGS=-I/usr/include -I/usr/local/include ${MIMA_CONFIG_CFLAGS}
 #CPPFLAGS =  -I/usr/include -I/usr/local/include -I${NETCDF_INC} -I${MPI_DIR}/include #-I/usr/mpi/intel/mvapich-1.1.0/include
 #CPPFLAGS =  -I/usr/include -I/usr/local/include -I${NETCDF_INC}  -I${MVAPICH2_INC} #-I/usr/mpi/intel/mvapich-1.1.0/include
 
-FC = mpif90
-LD = mpif90
+#FC = mpif90
+#LD = mpif90
+#FC=ifort
+#LD=ifort
+#CC=icc
+FC=ifort
+LD=ifort
+CC=icc
+#
+MPIFC=mpiifort
+MPILD=mpiifort
+MPICC=mpiicc
+MPICXX=mpiicc
+
 
 #LDFLAGS = -shared-intel -L/usr/local/lib -L${LIB_NETCDF}
 # yoder:

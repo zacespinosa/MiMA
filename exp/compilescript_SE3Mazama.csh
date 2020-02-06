@@ -89,7 +89,7 @@ echo "*** set up directory structure..."
 # setup directory structure
 if ( ! -d $execdir ) mkdir $execdir
 if ( -e $workdir ) then
-  echo "ERROR: Existing workdir may contaminate run.  Move or remove $workdir and try again."
+  echo "ERROR: Existing workdir may contaminate run. Move or remove $workdir and try again."
   exit 1
 endif
 #--------------------------------------------------------------------------------------------------------
