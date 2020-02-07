@@ -62,9 +62,6 @@ CPPFLAGS=-I/usr/include -I/usr/local/include ${MIMA_CONFIG_CFLAGS}
 
 #FC = mpif90
 #LD = mpif90
-#FC=ifort
-#LD=ifort
-#CC=icc
 FC=ifort
 LD=ifort
 CC=icc
@@ -77,12 +74,16 @@ MPICXX=mpiicc
 
 #LDFLAGS = -shared-intel -L/usr/local/lib -L${LIB_NETCDF}
 # yoder:
-LDFLAGS = -shared-intel -L/usr/local/lib -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB} -lnetcdf -lnetcdff
+#LDFLAGS = -shared-intel -L/usr/local/lib -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB} -L${MPI_DIR}/lib -L${HDF5_DIR}/lib -lnetcdf -lnetcdff -lmpi_usempif08 -lmpi_usempi_ignore_tkr  -lmpi_mpifh -lmpi
+#LDFLAGS = -shared-intel -L/usr/local/lib  -L/opt/ohpc/pub/libs/intel/openmpi3/netcdf-fortran/4.5.2/lib -lnetcdff  -L/opt/ohpc/pub/libs/intel/openmpi3/hdf5/1.10.5/lib  -L/opt/ohpc/pub/libs/intel/openmpi3/netcdf/4.7.1/lib -lnetcdf -lnetcdf -lm -Wl,-rpath -Wl,/opt/ohpc/pub/mpi/openmpi3-intel/3.1.4/lib -Wl,--enable-new-dtags  -L/opt/ohpc/pub/mpi/openmpi3-intel/3.1.4/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr  -lmpi_mpifh -lmpi
+#
+# from Sherlock:
+# LDFLAGS = -shared-intel -L/usr/local/lib -L${NETCDF_DIR}/lib -L${NETCDF_FORTRAN_DIR}/lib -L${HDF5_DIR}/lib -L${MPI_DIR}/lib -lnetcdf -lnetcdff -lmpifort
+LDFLAGS = -shared-intel -L/usr/local/lib  -L/opt/ohpc/pub/libs/intel/openmpi3/netcdf-fortran/4.5.2/lib -L/opt/ohpc/pub/libs/intel/openmpi3/hdf5/1.10.5/lib  -L/opt/ohpc/pub/libs/intel/openmpi3/netcdf/4.7.1/lib -L/opt/ohpc/pub/mpi/openmpi3-intel/3.1.4/lib -Wl,-rpath -Wl,/opt/ohpc/pub/mpi/openmpi3-intel/3.1.4/lib -Wl,--enable-new-dtags -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi  -lnetcdf -lnetcdff -lm
 #
 # something in this breaks (getting an error like, "variable name must start with a letter"). we need a simpler string. the above appears to work.
 #   generally, efforts for a comprehensive, semi-automated approach to construct the -L, -I tags from *-config calls probably 1) is overkill anyway, and
 #   2) breaks mkmf. One approach that might work is to do the same basic construction of MIMA_CONFIG_LDFLAGS, but use the L-only and l-only options.
-#LDFLAGS = ${MIMA_CONFIG_LDFLAGS}
 
 #
 CFLAGS = -D__IFC

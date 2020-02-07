@@ -1,4 +1,8 @@
 #!/bin/csh
+#SBATCH -n 1
+#SBATCH -o mima_compile.out
+#SBATCH -e mima_compile.err
+#
 #Minimal runscript for atmospheric dynamical cores
 #
 # Mazama:
@@ -8,7 +12,6 @@
 module purge
 module unuse /usr/local/modulefiles
 #
-
 #module load intel
 #module load mvapich2
 module load intel/19.1.0.166
@@ -32,11 +35,15 @@ module load netcdf-fortran/4.5.2
 
 # openmpi3:
 # pnetcdf-config --fflags; pnetcdf-config --fcflags;
-set MIMA_CONFIG_FFLAGS = "`nc-config --fflags; nf-config --fflags` -I${HDF5_INC} -I${HDF5_LIB} -I${MPI_DIR}/include  -I${MPI_DIR}/lib -I${NETCDF_FORTRAN_LIB}"
+set MIMA_CONFIG_FFLAGS = "`nf-config --cflags pkg-config --cflags ompi-fort` -I${HDF5_INC} -I${HDF5_LIB} -I${NETCDF_FORTRAN_LIB} -I${NETCDF_LIB}"
 #$ pnetcdf-config --cflags ompi; pnetcdf-config --cflags; pkg-config --cflags ompi-fort;
-set MIMA_CONFIG_CFLAGS = "`nc-config --cflags; nf-config --cflags; pkg-config --cflags ompi; pkg-config --cflags ompi-fort` -I${HDF5_INC}"
+set MIMA_CONFIG_CFLAGS = "`nf-config --cflags; pkg-config --cflags ompi`  "
 # x; ncxx4-config --libs; pnetcdf-config --ldflags; pnetcdf-config --libs
-set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nc-config --libs; nc-config --flibs; nf-config --flibs; pkg-config --libs ompi; pkg-config --libs ompi-fort` -L${HDF5_LIB}"
+#set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nc-config --libs; nc-config --flibs; nf-config --flibs; pkg-config --libs ompi; pkg-config --libs ompi-fort` -L${HDF5_LIB}"
+set MIMA_CONFIG_LDFLAGS = " -shared-intel -L/usr/local/lib `nf-config --flibs; pkg-config --libs ompi-fort` "
+#set LDFLAGS = " -shared-intel -L/usr/local/lib `nf-config --flibs; pkg-config --libs ompi-fort` "
+set LDFLAGS = "-shared-intel -L/usr/local/lib  -L/opt/ohpc/pub/libs/intel/openmpi3/netcdf-fortran/4.5.2/lib -lnetcdff  -L/opt/ohpc/pub/libs/intel/openmpi3/hdf5/1.10.5/lib  -L/opt/ohpc/pub/libs/intel/openmpi3/netcdf/4.7.1/lib -lnetcdf -lnetcdf -lm -Wl,-rpath -Wl,/opt/ohpc/pub/mpi/openmpi3-intel/3.1.4/lib -Wl,--enable-new-dtags  -L/opt/ohpc/pub/mpi/openmpi3-intel/3.1.4/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr  -lmpi_mpifh -lmpi "
+#set LDFLAGS = " -shared-intel -L/usr/local/lib `nf-config --flibs; pkg-config --libs ompi-fort` "
 
 # TODO: in the template, LDPATH should be getting set to MIMA_CONFIG_LDFLAGS, but it appears that it is not. It is, in fact, the very final compile step
 #  that appears to be failing because the linking paths are not provided... and after all of this, it looks like it may just need the -L and -l prams for
@@ -109,5 +116,7 @@ $mkmf -p mima.x -t $template -c "$cppDefs" -a $sourcedir $pathnames /usr/local/i
 #  syntax elsewhere. I think that the pkg-config, nc-config, nf-config, etc. calls produce some content that mkmf+cshell cannot handle, resulting in an
 #  error like, "variable name must start with a letter" (so I think it's trying to define a variable in the middle of the variable definition string).
 #set LDFLAGS = "${MIMA_CONFIG_LDFLAGS}"
-
+#
+#echo "Make with LDFLAGS: $LDFLAGS"
+#
 make -f Makefile -j $npes
